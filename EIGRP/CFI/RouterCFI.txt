@@ -1,0 +1,126 @@
+enable
+configure terminal
+hostname RouterCFI
+
+banner motd #
+Designed and Configured by
+411221012 - Kenedi Peres
+#
+
+enable secret nitesane98
+service password-encryption
+username admin secret nitesane98
+ip domain-name cfi.local
+crypto key generate rsa general-keys modulus 1024
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 2
+line console 0
+password nitesane98
+login
+exit
+line vty 0 15
+transport input ssh
+login local
+exit
+
+interface Serial2/0
+ip address 10.0.0.6 255.255.255.252
+clock rate 64000
+no shutdown
+exit
+
+interface Serial3/0
+ip address 10.0.0.10 255.255.255.252
+clock rate 64000
+no shutdown
+exit
+
+interface Serial6/0
+ip address 203.0.113.3 255.255.255.252
+no shutdown
+exit
+
+router eigrp 100
+network 192.168.65.0 0.0.0.255
+network 192.168.70.0 0.0.0.255
+network 192.168.75.0 0.0.0.255
+network 10.0.0.4 0.0.0.3
+network 10.0.0.8 0.0.0.3
+eigrp router-id 3.3.3.3
+no auto-summary
+exit
+
+interface FastEthernet0/0
+no shutdown
+exit
+
+interface FastEthernet1/0
+shutdown
+exit
+
+interface FastEthernet0/0.65
+encapsulation dot1Q 65
+ip address 192.168.65.1 255.255.255.0
+exit
+
+interface FastEthernet0/0.70
+encapsulation dot1Q 70
+ip address 192.168.70.1 255.255.255.0
+exit
+
+interface FastEthernet0/0.75
+encapsulation dot1Q 75
+ip address 192.168.75.1 255.255.255.0
+exit
+
+ip dhcp pool VLAN65
+network 192.168.65.0 255.255.255.0
+default-router 192.168.65.1
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN70
+network 192.168.70.0 255.255.255.0
+default-router 192.168.70.1
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool VLAN75
+network 192.168.75.0 255.255.255.0
+default-router 192.168.75.1
+dns-server 8.8.8.8
+exit
+
+access-list 100 permit udp any any eq 67
+access-list 100 permit udp any any eq 68
+access-list 100 permit eigrp any any
+access-list 100 permit ip 192.168.70.0 0.0.0.255 192.168.15.0 0.0.0.255
+access-list 100 permit ip 192.168.70.0 0.0.0.255 192.168.45.0 0.0.0.255
+access-list 100 permit ip 192.168.70.0 0.0.0.255 192.168.50.0 0.0.0.255
+access-list 100 permit ip 192.168.70.0 0.0.0.255 192.168.55.0 0.0.0.255
+access-list 100 permit ip 192.168.70.0 0.0.0.255 192.168.100.0 0.0.0.255
+access-list 100 permit ip 192.168.15.0 0.0.0.255 192.168.70.0 0.0.0.255
+access-list 100 permit ip 192.168.45.0 0.0.0.255 192.168.70.0 0.0.0.255
+access-list 100 permit ip 192.168.50.0 0.0.0.255 192.168.70.0 0.0.0.255
+access-list 100 permit ip 192.168.55.0 0.0.0.255 192.168.70.0 0.0.0.255
+access-list 100 permit ip 192.168.100.0 0.0.0.255 192.168.70.0 0.0.0.255
+access-list 100 deny ip any any
+
+interface FastEthernet0/0.65
+ip access-group 100 in
+ip access-group 100 out
+exit
+
+interface FastEthernet0/0.70
+ip access-group 100 in
+ip access-group 100 out
+exit
+
+interface FastEthernet0/0.75
+ip access-group 100 in
+ip access-group 100 out
+exit
+
+end
+write memory
